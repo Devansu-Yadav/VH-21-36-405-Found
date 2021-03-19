@@ -3,6 +3,8 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_mail import Mail,Message
 import json
 from datetime import datetime
+
+app = Flask(__name__)
 @app.route("/", methods=['GET', 'POST'])
 def library():
     print("Helo")
