@@ -13,3 +13,4 @@ def library():
         '''Add entry to the database'''
 
     return render_template('index.html')
+app.run(debug  = True)
