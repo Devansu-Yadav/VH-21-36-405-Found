@@ -1,55 +1,156 @@
 <!DOCTYPE html>
 
 <html>
-    <head>
-        <meta charset="utf-8">
-        <title>READIFY</title>
-        <style media="screen">
-        #custom-button {
-            padding: 10px;
-            color: white;
-            background-color: #009578;
-            border: 1px solid #000;
-            border-radius: 5px;
-            cursor: pointer;
-          }
-          
-          #custom-button:hover {
-            background-color: #00b28f;
-          }
-          
-          #custom-text {
-            margin-left: 10px;
-            font-family: sans-serif;
-            color: #aaa;
-          }
-        </style>
-    </head>
-    <body>
+  <head>
+    <meta charset="utf-8" />
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+      integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+      crossorigin="anonymous"
+    />
+    <script
+      src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+      integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+      crossorigin="anonymous"
+    ></script>
+    <title>READIFY</title>
+    <style media="screen">
+      #custom-button {
+        padding: 10px;
+        color: white;
+        background-color: #009578;
+        border: 1px solid #000;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+
+      #custom-button:hover {
+        background-color: #00b28f;
+      }
+
+      #custom-text {
+        margin-left: 10px;
+        font-family: sans-serif;
+        color: #aaa;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar navbar-light bg-light">
+      <div class="lg:w-1/2 w-full lg:pr-10 lg:py-6 mb-6 lg:mb-0">
+        <a class="text-sm title-font text-gray-500 tracking-widest">READIFY</a>
+      </div>
+    </nav>
+
+    <div class="container my-4">
+      <div py-3>
         <input type="file" id="real-file" hidden="hidden" />
-        <button type="button" id="custom-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
-            <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
-          </svg></button>
+        <button type="button" id="custom-button" style="border-radius: 15px">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            fill="currentColor"
+            class="bi bi-plus"
+            viewBox="0 0 16 16"
+          >
+            <path
+              d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"
+            />
+          </svg>
+        </button>
         <span id="custom-text">No file chosen yet</span>
+      </div>
 
-        <script type="text/javascript">
-        const realFileBtn = document.getElementById("real-file");
-        const customBtn = document.getElementById("custom-button");
-        const customTxt = document.getElementById("custom-text");
+      <br /><br />
 
-        customBtn.addEventListener("click", function() {
+      <div>
+        <input
+          id="txtInput"
+          class="form-control"
+          rows="5"
+          placeholder="Add your text here..."
+        />
+      </div>
+      <br /><br />
+
+      <div class="py-5">
+        <ul style="overflow: auto">
+          <li style="float: left; list-style: none">
+            <h2 class="px-2">Select Voice:</h2>
+          </li>
+          <li class="px-2" style="float: left; list-style: none; padding: 10px">
+            <select id="voiceList"></select>
+          </li>
+        </ul>
+      </div>
+
+      <div>
+        <button class="btn btn btn-primary" id="btnSpeak">Speak!</button>
+      </div>
+    </div>
+
+    <script type="text/javascript">
+      const realFileBtn = document.getElementById("real-file");
+      const customBtn = document.getElementById("custom-button");
+      const customTxt = document.getElementById("custom-text");
+
+      customBtn.addEventListener("click", function () {
         realFileBtn.click();
+      });
+
+      realFileBtn.addEventListener("change", function () {
+        if (realFileBtn.value) {
+          customTxt.innerHTML = realFileBtn.value.match(
+            /[\/\\]([\w\d\s\.\-\(\)]+)$/
+          )[1];
+        } else {
+          customTxt.innerHTML = "No file chosen, yet.";
+        }
+      });
+    </script>
+
+    <script>
+      var txtInput = document.querySelector("#txtInput");
+      var voiceList = document.querySelector("#voiceList");
+      var btnSpeak = document.querySelector("#btnSpeak");
+      var synth = window.speechSynthesis;
+      var voices = [];
+
+      PopulateVoices();
+      if (speechSynthesis !== undefined) {
+        speechSynthesis.onvoiceschanged = PopulateVoices;
+      }
+
+      btnSpeak.addEventListener("click", () => {
+        var toSpeak = new SpeechSynthesisUtterance(txtInput.value);
+        var selectedVoiceName = voiceList.selectedOptions[0].getAttribute(
+          "data-name"
+        );
+        voices.forEach((voice) => {
+          if (voice.name === selectedVoiceName) {
+            toSpeak.voice = voice;
+          }
+        });
+        synth.speak(toSpeak);
+      });
+
+      function PopulateVoices() {
+        voices = synth.getVoices();
+        var selectedIndex =
+          voiceList.selectedIndex < 0 ? 0 : voiceList.selectedIndex;
+        voiceList.innerHTML = "";
+        voices.forEach((voice) => {
+          var listItem = document.createElement("option");
+          listItem.textContent = voice.name;
+          listItem.setAttribute("data-lang", voice.lang);
+          listItem.setAttribute("data-name", voice.name);
+          voiceList.appendChild(listItem);
         });
 
-realFileBtn.addEventListener("change", function() {
-  if (realFileBtn.value) {
-    customTxt.innerHTML = realFileBtn.value.match(
-      /[\/\\]([\w\d\s\.\-\(\)]+)$/
-    )[1];
-  } else {
-    customTxt.innerHTML = "No file chosen, yet.";
-  }
-});
+        voiceList.selectedIndex = selectedIndex;
+      }
     </script>
-    </body>
+  </body>
 </html>
